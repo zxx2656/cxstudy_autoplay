@@ -12,19 +12,25 @@
 """
 import os
 
-# ---- 专用浏览器: 夸克 ----
-# 提示: 这里只列"通用"位置; 程序还会查注册表, 并在各盘符搜索常见布局
-#       (X:\Quark\ , X:\Program Files\Quark\ 等); 都找不到时会提示把路径
-#       写入 browser_path.txt(只需一次)。
-BROWSER_NAME = "夸克"
+# ---- 专用浏览器: Microsoft Edge (Windows 10/11 自带, 免安装) ----
+# 注意: 专用配置目录必须是"非默认目录", 否则 Edge/Chrome 136+ 会
+#       直接禁用调试端口(--remote-debugging-port), 导致无法接管。
+BROWSER_NAME = "Microsoft Edge"
+BROWSER_EXE_NAME = "msedge.exe"
 BROWSER_EXE_CANDIDATES = [
-    r"%LOCALAPPDATA%\Quark\quark.exe",
-    r"%ProgramFiles%\Quark\quark.exe",
-    r"%ProgramFiles(x86)%Quark\quark.exe",
+    r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe",
+    r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe",
+    r"%LOCALAPPDATA%\Microsoft\Edge\Application\msedge.exe",
 ]
-BROWSER_EXE_NAME = "quark.exe"
-# 程序自己的浏览器配置(非默认目录, 且与你日常浏览器隔离)
-BROWSER_PROFILE = r"%LOCALAPPDATA%\cxauto\quark-profile"
+# 各盘符浅层搜索用的相对路径(用于装在非系统盘的机器)
+BROWSER_SEARCH_SUBPATHS = [
+    r"Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
+    r"Program Files\Microsoft\Edge\Application\msedge.exe",
+]
+# 注册表"卸载信息"里用于匹配本浏览器的产品名关键字
+BROWSER_UNINSTALL_NAMES = ("microsoft edge", "edge")
+# 程序自己的浏览器配置(与你的浏览器隔离)
+BROWSER_PROFILE = r"%LOCALAPPDATA%\cxauto\edge-profile"
 
 # ---- CDP ----
 CDP_PORT = 9222
@@ -174,7 +180,7 @@ def _from_registry():
     # 2) 卸载信息表: 按产品名匹配, 再拼上可执行文件名
     keys = [r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
             r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"]
-    names = ("夸克", "quark", "Quark")
+    names = BROWSER_UNINSTALL_NAMES
     for kp in keys:
         for root in (winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER):
             try:
@@ -206,21 +212,15 @@ def _from_registry():
 
 
 def _search_disks():
-    """在各盘符的常见目录里浅层搜索(有界限, 不会很慢)。"""
-    subs = [
-        r"Quark\{exe}", r"Program Files\Quark\{exe}",
-        r"Program Files (x86)\Quark\{exe}",
-        r"QuarkPC\{exe}", r"Program Files\QuarkPC\{exe}",
-        r"Program Files (x86)\QuarkPC\{exe}",
-        r"Apps\Quark\{exe}",
-    ]
+    """在各盘符的常见目录里浅层搜索(有界限, 不会很慢)。
+    用于浏览器装在非系统盘、或 System/ProgramFiles 环境变量异常的机器。"""
     try:
         import string
         for letter in string.ascii_uppercase:
             drive = f"{letter}:\\"
             if not os.path.isdir(drive):
                 continue
-            for s in subs:
+            for s in BROWSER_SEARCH_SUBPATHS:
                 p = os.path.join(drive, s.format(exe=BROWSER_EXE_NAME))
                 if os.path.isfile(p):
                     return p

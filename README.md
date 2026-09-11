@@ -4,6 +4,7 @@
 ——播完自动进入下一个任务、遇到章节测验自动跳过、已完成的视频不重播、被暂停/卡住自动恢复。
 
 > 只有托盘图标一个界面，不弹窗、不抢焦点、不碰你日常使用的浏览器。
+> 目标浏览器为 **Microsoft Edge**（Windows 10/11 自带，免安装）。
 
 ---
 
@@ -55,7 +56,8 @@
 ## 环境要求
 
 - Windows 10 / 11
-- **夸克浏览器（Quark PC）** —— 默认目标浏览器（可在 `config.py` 改为 Chrome / Edge）
+- **Microsoft Edge** —— 系统自带，通常无需额外安装
+  （也可在 `config.py` 里改为 Chrome / 夸克等其它 Chromium 内核浏览器）
 - 从源码运行需要 Python 3.9+ ；使用 `dist\CxAuto\CxAuto.exe` 则无需 Python
 
 ---
@@ -136,7 +138,7 @@ cxstudy_autoplay/
 
 | 配置项 | 说明 |
 |---|---|
-| `BROWSER_NAME` / `BROWSER_EXE_CANDIDATES` | 目标浏览器（默认夸克；改这里即可换 Chrome / Edge） |
+| `BROWSER_NAME` / `BROWSER_EXE_CANDIDATES` | 目标浏览器（默认 Microsoft Edge；改这里即可换 Chrome / 夸克） |
 | `BROWSER_PROFILE` | 专用浏览器配置目录（必须非默认目录） |
 | `LOGIN_URL` | 启动后自动打开的登录页 |
 | `AUTO_START` | 是否启动即自动连播（默认 `False`，由托盘手动开启） |
