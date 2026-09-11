@@ -1,0 +1,4 @@
+# 运行依赖(源码方式运行时安装): pip install -r requirements.txt
+websocket-client>=1.7
+pystray>=0.19
+pillow>=10.0
